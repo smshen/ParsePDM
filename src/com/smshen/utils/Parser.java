@@ -3,7 +3,6 @@ package com.smshen.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -12,7 +11,6 @@ import org.dom4j.io.SAXReader;
 public class Parser {
 
     private PDM pdm = new PDM();
-    private final static Logger LOGGER = Logger.getLogger(Parser.class.getName());
 
     public PDM pdmParser(String pdmFileName) throws Exception {
         SAXReader reader = new SAXReader();
@@ -28,7 +26,7 @@ public class Parser {
         pdm.setDBMSCode(dbms.selectSingleNode("a:Code").getText());
         pdm.setDBMSName(dbms.selectSingleNode("a:Name").getText());
 
-        LOGGER.info("解析PDM为:" + pdm.getCode() + "(" + pdm.getName() + ")  DBMS为:" + pdm.getDBMSCode() + "(" + pdm.getDBMSName() + ")");
+        System.out.println("解析PDM为:" + pdm.getCode() + "(" + pdm.getName() + ")  DBMS为:" + pdm.getDBMSCode() + "(" + pdm.getDBMSName() + ")");
 
         pdm.setUsers(pdmUserParser(model));
         pdm.setTables(pdmTableParser(model));
@@ -194,8 +192,11 @@ public class Parser {
 
                 String id = ((Element) referenceJoinNode.selectSingleNode("c:Object1/o:Column")).attributeValue("Ref");
                 pdmReferenceJoin.setParentTable_Col(pdmReference.getParentTable().getPDMColumn(id));
-
-                id = ((Element) referenceJoinNode.selectSingleNode("c:Object2/o:Column")).attributeValue("Ref");
+                Element element = (Element) referenceJoinNode.selectSingleNode("c:Object2/o:Column");
+                if (element == null) {
+                    continue;
+                }
+                id = element.attributeValue("Ref");
                 pdmReferenceJoin.setChildTable_Col(pdmReference.getChildTable().getPDMColumn(id));
 
                 pdmReference.addReferenceJoin(pdmReferenceJoin);
